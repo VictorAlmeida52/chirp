@@ -18,7 +18,6 @@ import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 
 import { prisma } from "~/server/db";
 
-
 /**
  * This is the actual context you will use in your router. It will be used to process every request
  * that goes through your tRPC endpoint.
@@ -26,7 +25,6 @@ import { prisma } from "~/server/db";
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = (opts: CreateNextContextOptions) => {
-
   const { req } = opts;
   const sesh = getAuth(req);
 
@@ -58,10 +56,10 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
       data: {
         ...shape.data,
         zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null
-      }
+          error.cause instanceof ZodError ? error.cause.flatten() : null,
+      },
     };
-  }
+  },
 });
 
 /**
@@ -95,7 +93,7 @@ const enforceUserIsAuthed = t.middleware(async ({ ctx, next }) => {
   return next({
     ctx: {
       userId: ctx.userId,
-    }
+    },
   });
 });
 
