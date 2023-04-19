@@ -8,11 +8,23 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
+import { useState } from "react";
 
 dayjs.extend(relativeTime);
 
 const CreatePostWizard = () => {
   const { user } = useUser();
+
+  const [input, setInput] = useState("");
+
+  const ctx = api.useContext()
+
+  const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
+    onSuccess: () => {
+      setInput("");
+      void ctx.posts.getAll.invalidate();
+    }
+  });
 
   if (!user) return null;
 
@@ -23,11 +35,17 @@ const CreatePostWizard = () => {
              className="w-14 h-14 rounded-full"
              width={56}
              height={56} />
-      <input placeholder="Type some emojis!" className="bg-transparent grow outline-none" />
+      <input placeholder="Type some emojis!"
+             className="bg-transparent grow outline-none"
+             type="text"
+             value={input}
+             onChange={(e) => setInput(e.target.value)}
+             disabled={isPosting}
+      />
+      <button onClick={() => mutate({ content: input })}>Post</button>
     </div>
   );
 };
-
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number]
 const PostView = (props: PostWithUser) => {
@@ -58,22 +76,22 @@ const Feed = () => {
 
   return (
     <div className="flex flex-col">
-      {data?.map((fullPost) => (
+      {data.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
     </div>
-  )
-}
+  );
+};
 
 const Home: NextPage = () => {
 
-  const {  isLoaded: userLoaded, isSignedIn } = useUser();
+  const { isLoaded: userLoaded, isSignedIn } = useUser();
 
   // Start fetching asap
   api.posts.getAll.useQuery();
 
   // Return empty div if user isn't loaded
-  if (!userLoaded) return <div />
+  if (!userLoaded) return <div />;
 
   return (
     <>
