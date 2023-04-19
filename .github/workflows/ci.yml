@@ -21,6 +21,3 @@ jobs:
 
       - name: Run lint
         run: npm run lint
-
-      - name: Print Environment Variable
-        run: echo $DATABASE_URL
