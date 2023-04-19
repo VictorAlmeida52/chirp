@@ -1,10 +1,6 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  privateProcedure,
-  publicProcedure
-} from "~/server/api/trpc";
+import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
 import { clerkClient } from "@clerk/nextjs/api";
 import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -108,6 +104,6 @@ export const postsRouter = createTRPCRouter({
           authorId,
           content: input.content
         }
-      });
+      })
     })
 });
