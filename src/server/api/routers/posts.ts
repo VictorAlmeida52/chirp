@@ -3,19 +3,48 @@ import { z } from "zod";
 import {
   createTRPCRouter,
   privateProcedure,
-  publicProcedure,
+  publicProcedure
 } from "~/server/api/trpc";
 import { clerkClient } from "@clerk/nextjs/api";
 import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { filterUserForClient } from "~/server/helpers/filterUserForClients";
+import type { Post } from "@prisma/client";
+
+const addUsersDataToPosts = async (posts: Post[]) => {
+
+  const users = (
+    await clerkClient.users.getUserList({
+      userId: posts.map((post) => post.authorId),
+      limit: 100
+    })
+  ).map(filterUserForClient);
+
+  return posts.map((post) => {
+    const author = users.find((user) => user.id === post.authorId);
+    if (!author || !author.username)
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Author for post not found"
+      });
+
+    return {
+      post,
+      author: {
+        ...author,
+        username: author.username
+      }
+    };
+  });
+
+};
 
 // Create a new ratelimiter, that allows 3 requests per minute
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(3, "1 m"),
-  analytics: true,
+  analytics: true
 });
 
 export const postsRouter = createTRPCRouter({
@@ -24,41 +53,33 @@ export const postsRouter = createTRPCRouter({
       take: 100,
       orderBy: [
         {
-          createdAt: "desc",
-        },
-      ],
+          createdAt: "desc"
+        }
+      ]
     });
 
-    const users = (
-      await clerkClient.users.getUserList({
-        userId: posts.map((post) => post.authorId),
-        limit: 100,
-      })
-    ).map(filterUserForClient);
+    return addUsersDataToPosts(posts);
 
-    console.log(users);
-
-    return posts.map((post) => {
-      const author = users.find((user) => user.id === post.authorId);
-      if (!author || !author.username)
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Author for post not found",
-        });
-
-      return {
-        post,
-        author: {
-          ...author,
-          username: author.username,
-        },
-      };
-    });
   }),
+  getPostsByUserId: publicProcedure
+    .input(
+      z.object({
+        userId: z.string()
+      })
+    )
+    .query(async ({ ctx, input }) =>
+      ctx.prisma.post.findMany({
+        where: {
+          authorId: input.userId
+        },
+        take: 100,
+        orderBy: [{ createdAt: "desc" }]
+      }).then(addUsersDataToPosts)
+    ),
   create: privateProcedure
     .input(
       z.object({
-        content: z.string().emoji("Only emojis are allowed").min(1).max(255),
+        content: z.string().emoji("Only emojis are allowed").min(1).max(255)
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -70,8 +91,8 @@ export const postsRouter = createTRPCRouter({
       return await ctx.prisma.post.create({
         data: {
           authorId,
-          content: input.content,
-        },
+          content: input.content
+        }
       });
-    }),
+    })
 });
