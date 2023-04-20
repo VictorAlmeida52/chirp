@@ -86,7 +86,6 @@ const PostFooter = (props: { postId: string }) => {
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
-      console.log(errorMessage)
       if (errorMessage && errorMessage[0]) {
         toast.error(errorMessage[0]);
       } else {
@@ -128,7 +127,7 @@ type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 export const PostView = (props: PostWithUser) => {
   const { post, author } = props;
   return (
-    <div key={post.id} className="flex gap-3 border-b border-slate-400 p-4">
+    <div key={post.id} className="flex gap-3 border-b border-t border-slate-400 p-4">
       <HoverProfile author={author} />
       <div className="flex flex-col">
         <div className="flex gap-2 text-slate-300">
