@@ -54,13 +54,16 @@ export const postsRouter = createTRPCRouter({
           }
         });
 
-        if (!post) throw new TRPCError({ code: "NOT_FOUND" })
+        if (!post) throw new TRPCError({ code: "NOT_FOUND" });
 
         return (await addUsersDataToPosts([post]))[0];
       }
     ),
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
+      where: {
+        replyingTo: ""
+      },
       take: 100,
       orderBy: [
         {
@@ -72,6 +75,25 @@ export const postsRouter = createTRPCRouter({
     return addUsersDataToPosts(posts);
 
   }),
+  getAllReplies: publicProcedure
+    .input(z.object({
+      postId: z.string()
+    }))
+    .query(async ({ ctx, input }) => {
+      const replies = await ctx.prisma.post.findMany({
+        where: {
+          replyingTo: input.postId
+        },
+        take: 100,
+        orderBy: [
+          {
+            createdAt: "desc"
+          }
+        ]
+      });
+
+      return addUsersDataToPosts(replies);
+    }),
   getPostsByUserId: publicProcedure
     .input(
       z.object({
@@ -90,7 +112,8 @@ export const postsRouter = createTRPCRouter({
   create: privateProcedure
     .input(
       z.object({
-        content: z.string().emoji("Only emojis are allowed").min(1).max(255)
+        content: z.string().emoji("Only emojis are allowed").min(1).max(255),
+        replyingTo: z.string().cuid().optional()
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -102,8 +125,9 @@ export const postsRouter = createTRPCRouter({
       return await ctx.prisma.post.create({
         data: {
           authorId,
-          content: input.content
+          content: input.content,
+          replyingTo: input.replyingTo ?? input.replyingTo
         }
-      })
+      });
     })
 });
