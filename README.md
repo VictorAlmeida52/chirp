@@ -14,7 +14,7 @@ A twitter-like feed where users can only post emojis.
    - [x] **Create new post**
    - [x] **View a single post**
    - [x] Like
-   - [ ] Comment
+   - [x] Comment
 
  In bold are features developed during the [T3 Stack Tutorial](https://www.youtube.com/watch?v=YkOSUVzOAA4).  
  Further improvements and new features implemented on top of the tutorial code are not bold.
