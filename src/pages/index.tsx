@@ -37,11 +37,7 @@ const Home: NextPage = () => {
     <>
       <Header />
       <PageLayout>
-        {!!isSignedIn && (
-          <div className="flex border-b border-slate-400 p-4">
-            <CreatePostWizard />
-          </div>
-        )}
+        {!!isSignedIn && <CreatePostWizard />}
         <Feed />
       </PageLayout>
     </>

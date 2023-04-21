@@ -33,7 +33,7 @@ export const CreatePostWizard = (props: { replyingTo?: string }) => {
   if (!user) return null;
 
   return (
-    <div className="flex w-full items-center gap-3">
+    <div className="flex w-full items-center gap-3 border-b border-slate-400 p-4">
       <Image
         src={user.profileImageUrl}
         alt={`@${user.username ?? "username not found"}'s profile picture`}
