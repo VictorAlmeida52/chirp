@@ -7,8 +7,13 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "react-hot-toast";
 import Head from "next/head";
 import { Analytics } from "@vercel/analytics/react";
+import { useEffect } from "react";
 
 const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
+  useEffect(() => {
+    window.document.documentElement.classList.add("dark");
+  }, []);
+
   return (
     <ClerkProvider {...pageProps}>
       <Head>
