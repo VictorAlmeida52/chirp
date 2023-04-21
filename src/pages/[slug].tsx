@@ -7,6 +7,7 @@ import Image from "next/image";
 import { LoadingPage } from "~/components/loading";
 import { PostView } from "~/components/postview";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
+import { Header } from "~/components/header";
 
 const ProfileFeed = (props: { userId: string }) => {
   const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
@@ -38,11 +39,14 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
       <Head>
         <title>{`@${data.username ?? "username not found"}`}</title>
       </Head>
+      <Header />
       <PageLayout>
         <div className="relative h-36 border-b border-slate-400 bg-slate-600">
           <Image
             src={data.profileImageUrl}
-            alt={`${data.username ?? ""}'s profile picture`}
+            alt={`${
+              data.username ?? data.externalUsername ?? "unknown"
+            }'s profile picture`}
             width={128}
             height={128}
             className="absolute bottom-0 left-0 -mb-[64px] ml-4 rounded-full border-4 border-black bg-black"
@@ -50,7 +54,7 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
         </div>
         <div className="h-[64px]"></div>
         <div className="p-4 text-2xl font-bold">{`@${
-          data.username ?? ""
+          data.username ?? data.externalUsername ?? "unknown"
         }`}</div>
         <div className="w-full border-t border-slate-400">
           <ProfileFeed userId={data.id} />

@@ -1,4 +1,4 @@
-import { SignInButton, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { type NextPage } from "next";
 
 import { api } from "~/utils/api";
@@ -7,6 +7,7 @@ import { LoadingPage } from "~/components/loading";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "~/components/postview";
 import { CreatePostWizard } from "~/components/create-post-wizard";
+import { Header } from "~/components/header";
 
 const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
@@ -33,17 +34,13 @@ const Home: NextPage = () => {
   if (!userLoaded) return <div />;
 
   return (
-    <PageLayout>
-      <div className="flex border-b border-slate-400 p-4">
-        {!isSignedIn && (
-          <div className="flex justify-center">
-            <SignInButton />
-          </div>
-        )}
+    <>
+      <Header />
+      <PageLayout>
         {!!isSignedIn && <CreatePostWizard />}
-      </div>
-      <Feed />
-    </PageLayout>
+        <Feed />
+      </PageLayout>
+    </>
   );
 };
 

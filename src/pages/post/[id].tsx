@@ -6,14 +6,15 @@ import { PageLayout } from "~/components/layout";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { PostView } from "~/components/postview";
 import { CreatePostWizard } from "~/components/create-post-wizard";
+import { Header } from "~/components/header";
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
   const { data } = api.posts.getById.useQuery({
-    id
+    id,
   });
 
   const { data: replies } = api.posts.getAllReplies.useQuery({
-    postId: id
+    postId: id,
   });
 
   if (!data) return <div>404</div>;
@@ -23,13 +24,14 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
       <Head>
         <title>{`${data.post.content} - @${data.author.username}`}</title>
       </Head>
+      <Header />
       <PageLayout>
         <PostView {...data} />
         <div className="p-8">
           <CreatePostWizard replyingTo={data.post.id} />
         </div>
-        <div className="border-b border-slate-400">
-          {replies?.map(reply => (
+        <div className="border-b">
+          {replies?.map((reply) => (
             <div key={reply.post.id}>
               <PostView {...reply} />
             </div>
@@ -47,14 +49,14 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   if (typeof id !== "string") throw new Error("No id");
 
-  await ssg.posts.getById.prefetch({ id })
-  await ssg.posts.getAllReplies.prefetch({ postId: id })
+  await ssg.posts.getById.prefetch({ id });
+  await ssg.posts.getAllReplies.prefetch({ postId: id });
 
   return {
     props: {
       trpcState: ssg.dehydrate(),
-      id
-    }
+      id,
+    },
   };
 };
 
