@@ -24,12 +24,25 @@ export const likesRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
+      const userId = ctx.userId ?? "NOT_LOGGED_IN";
       const { postId } = input;
-      return await ctx.prisma.like.count({
+      const count = await ctx.prisma.like.count({
         where: {
           postId,
         },
       });
+
+      const likedByUser = await ctx.prisma.like.count({
+        where: {
+          postId,
+          userId,
+        },
+      });
+
+      return {
+        count,
+        likedByUser: likedByUser === 1,
+      };
     }),
   create: privateProcedure
     .input(

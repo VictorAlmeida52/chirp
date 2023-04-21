@@ -70,7 +70,7 @@ const PostFooter = (props: { postId: string }) => {
   const { isSignedIn: isUserSignedIn } = useUser();
 
   const ctx = api.useContext();
-  const { data: likes, isLoading: isLoadingLikes } =
+  const { data: likeData, isLoading: isLoadingLikes } =
     api.likes.getCountByPost.useQuery({
       postId,
     });
@@ -78,7 +78,6 @@ const PostFooter = (props: { postId: string }) => {
     api.posts.getReplyCount.useQuery({
       postId,
     });
-  let likeCount = 0;
   let replyCount = 0;
 
   const { mutate: dislike } = api.likes.delete.useMutation({
@@ -108,7 +107,6 @@ const PostFooter = (props: { postId: string }) => {
     },
   });
 
-  if (!isLoadingLikes && likes && likes > 0) likeCount = likes;
   if (!isLoadingReplies && replies && replies > 0) replyCount = replies;
 
   return (
@@ -118,9 +116,19 @@ const PostFooter = (props: { postId: string }) => {
         className="group rounded-full p-1"
         onClick={() => like({ postId })}
       >
-        <div className="flex items-center gap-2 group-hover:text-red-600">
-          <HeartIcon className="" />
-          <span>{likeCount}</span>
+        <div
+          className={`flex items-center gap-2 group-hover:text-red-700 ${
+            likeData?.likedByUser ? "text-red-500" : ""
+          }`}
+        >
+          <HeartIcon
+            className={
+              likeData?.likedByUser
+                ? "fill-red-500 group-hover:fill-red-700"
+                : ""
+            }
+          />
+          <span>{likeData ? likeData.count : 0}</span>
         </div>
       </button>
       <Link className="group rounded-full p-1" href={`/post/${postId}`}>
