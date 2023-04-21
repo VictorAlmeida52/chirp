@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { clerkClient } from "@clerk/nextjs/api";
 import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -9,11 +13,10 @@ import { filterUserForClient } from "~/server/helpers/filterUserForClients";
 import type { Post } from "@prisma/client";
 
 const addUsersDataToPosts = async (posts: Post[]) => {
-
   const users = (
     await clerkClient.users.getUserList({
       userId: posts.map((post) => post.authorId),
-      limit: 100
+      limit: 100,
     })
   ).map(filterUserForClient);
 
@@ -22,98 +25,111 @@ const addUsersDataToPosts = async (posts: Post[]) => {
     if (!author || !author.username)
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
-        message: "Author for post not found"
+        message: "Author for post not found",
       });
 
     return {
       post,
       author: {
         ...author,
-        username: author.username
-      }
+        username: author.username,
+      },
     };
   });
-
 };
 
 // Create a new ratelimiter, that allows 3 requests per minute
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(3, "1 m"),
-  analytics: true
+  analytics: true,
 });
 
 export const postsRouter = createTRPCRouter({
   getById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      const post = await ctx.prisma.post.findUnique({
+        where: {
+          id: input.id,
+        },
+      });
 
-        const post = await ctx.prisma.post.findUnique({
-          where: {
-            id: input.id
-          }
-        });
+      if (!post) throw new TRPCError({ code: "NOT_FOUND" });
 
-        if (!post) throw new TRPCError({ code: "NOT_FOUND" });
-
-        return (await addUsersDataToPosts([post]))[0];
-      }
-    ),
+      return (await addUsersDataToPosts([post]))[0];
+    }),
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
       where: {
-        replyingTo: ""
+        replyingTo: "",
       },
       take: 100,
       orderBy: [
         {
-          createdAt: "desc"
-        }
-      ]
+          createdAt: "desc",
+        },
+      ],
     });
 
     return addUsersDataToPosts(posts);
-
   }),
   getAllReplies: publicProcedure
-    .input(z.object({
-      postId: z.string()
-    }))
+    .input(
+      z.object({
+        postId: z.string(),
+      })
+    )
     .query(async ({ ctx, input }) => {
       const replies = await ctx.prisma.post.findMany({
         where: {
-          replyingTo: input.postId
+          replyingTo: input.postId,
         },
         take: 100,
         orderBy: [
           {
-            createdAt: "desc"
-          }
-        ]
+            createdAt: "desc",
+          },
+        ],
       });
 
       return addUsersDataToPosts(replies);
     }),
+  getReplyCount: publicProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.prisma.post.count({
+        where: {
+          replyingTo: input.postId,
+        },
+      });
+    }),
   getPostsByUserId: publicProcedure
     .input(
       z.object({
-        userId: z.string()
+        userId: z.string(),
       })
     )
     .query(async ({ ctx, input }) =>
-      ctx.prisma.post.findMany({
-        where: {
-          authorId: input.userId
-        },
-        take: 100,
-        orderBy: [{ createdAt: "desc" }]
-      }).then(addUsersDataToPosts)
+      ctx.prisma.post
+        .findMany({
+          where: {
+            authorId: input.userId,
+          },
+          take: 100,
+          orderBy: [{ createdAt: "desc" }],
+        })
+        .then(addUsersDataToPosts)
     ),
   create: privateProcedure
     .input(
       z.object({
         content: z.string().emoji("Only emojis are allowed").min(1).max(255),
-        replyingTo: z.string().cuid().optional()
+        replyingTo: z.string().cuid().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -126,8 +142,8 @@ export const postsRouter = createTRPCRouter({
         data: {
           authorId,
           content: input.content,
-          replyingTo: input.replyingTo ?? input.replyingTo
-        }
+          replyingTo: input.replyingTo ?? input.replyingTo,
+        },
       });
-    })
+    }),
 });

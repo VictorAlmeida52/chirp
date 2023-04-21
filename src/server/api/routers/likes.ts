@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { createTRPCRouter, privateProcedure, publicProcedure } from "~/server/api/trpc";
+import {
+  createTRPCRouter,
+  privateProcedure,
+  publicProcedure,
+} from "~/server/api/trpc";
 import { TRPCError } from "@trpc/server";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
@@ -9,29 +13,28 @@ import { Redis } from "@upstash/redis";
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
   limiter: Ratelimit.slidingWindow(10, "1 m"),
-  analytics: true
+  analytics: true,
 });
 
 export const likesRouter = createTRPCRouter({
   getCountByPost: publicProcedure
     .input(
       z.object({
-        postId: z.string().cuid()
+        postId: z.string().cuid(),
       })
     )
     .query(async ({ ctx, input }) => {
       const { postId } = input;
-      return ctx.prisma.like.count({
+      return await ctx.prisma.like.count({
         where: {
-          postId
-        }
+          postId,
+        },
       });
-
     }),
   create: privateProcedure
     .input(
       z.object({
-        postId: z.string().cuid()
+        postId: z.string().cuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -43,14 +46,14 @@ export const likesRouter = createTRPCRouter({
       return ctx.prisma.like.create({
         data: {
           userId,
-          postId: input.postId
-        }
+          postId: input.postId,
+        },
       });
     }),
   delete: privateProcedure
     .input(
       z.object({
-        postId: z.string().cuid()
+        postId: z.string().cuid(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -63,9 +66,9 @@ export const likesRouter = createTRPCRouter({
         where: {
           postId_userId: {
             postId: input.postId,
-            userId
-          }
-        }
+            userId,
+          },
+        },
       });
-    })
+    }),
 });
