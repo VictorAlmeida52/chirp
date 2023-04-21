@@ -1,7 +1,6 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import {
   BirdIcon,
-  HomeIcon,
   LogInIcon,
   LogOutIcon,
   SearchIcon,
@@ -46,14 +45,14 @@ const UserPopupButton = () => {
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="mt-2">
+      <DropdownMenuContent className="mr-2 mt-2">
         <DropdownMenuLabel className="cursor-default">
           My Account
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex items-center">
-          <HomeIcon className="mr-4 h-4 w-4" />
-          <Link href="/">Home</Link>
+        <DropdownMenuItem className="flex items-center hover:cursor-not-allowed">
+          <UserIcon className="mr-4 h-4 w-4" />
+          <span>Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex items-center">
           <LogOutIcon className="mr-4 h-4 w-4" />
