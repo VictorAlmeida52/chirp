@@ -6,6 +6,7 @@ import { PageLayout } from "~/components/layout";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { PostView } from "~/components/postview";
 import { CreatePostWizard } from "~/components/create-post-wizard";
+import { Header } from "~/components/header";
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
   const { data } = api.posts.getById.useQuery({
@@ -23,6 +24,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
       <Head>
         <title>{`${data.post.content} - @${data.author.username}`}</title>
       </Head>
+      <Header />
       <PageLayout>
         <PostView {...data} />
         <div className="p-8">
