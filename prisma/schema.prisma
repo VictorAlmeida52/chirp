@@ -16,17 +16,19 @@ model Post {
   id         String   @id @default(cuid())
   createdAt  DateTime @default(now())
   content    String   @db.VarChar(255)
+  author     User     @relation("author", fields: [authorId], references: [id])
   authorId   String
   replyingTo String   @default("")
+  likedBy    User[]
 
   @@index([authorId, replyingTo])
 }
 
-model Like {
-  id     String @id @default(cuid())
-  postId String
-  userId String
-
-  @@unique([postId, userId])
-  @@index([postId, userId])
+model User {
+  id              String   @id
+  username        String
+  createdAt       DateTime @default(now())
+  profileImageUrl String
+  posts           Post[]   @relation("author")
+  liked           Post[]
 }

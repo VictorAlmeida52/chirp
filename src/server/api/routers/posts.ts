@@ -38,10 +38,10 @@ const addUsersDataToPosts = async (posts: Post[]) => {
   });
 };
 
-// Create a new ratelimiter, that allows 3 requests per minute
+// Create a new ratelimiter, that allows 1 requests per 3 seconds
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(3, "1 m"),
+  limiter: Ratelimit.slidingWindow(1, "3 s"),
   analytics: true,
 });
 
@@ -53,11 +53,22 @@ export const postsRouter = createTRPCRouter({
         where: {
           id: input.id,
         },
+        include: {
+          author: true,
+          _count: {
+            select: { likedBy: true },
+          },
+          likedBy: {
+            where: {
+              id: ctx.userId ?? "",
+            },
+          },
+        },
       });
 
       if (!post) throw new TRPCError({ code: "NOT_FOUND" });
 
-      return (await addUsersDataToPosts([post]))[0];
+      return post;
     }),
   getAll: publicProcedure.query(async ({ ctx }) => {
     const posts = await ctx.prisma.post.findMany({
@@ -70,9 +81,20 @@ export const postsRouter = createTRPCRouter({
           createdAt: "desc",
         },
       ],
+      include: {
+        author: true,
+        _count: {
+          select: { likedBy: true },
+        },
+        likedBy: {
+          where: {
+            id: ctx.userId ?? "",
+          },
+        },
+      },
     });
 
-    return addUsersDataToPosts(posts);
+    return posts;
   }),
   getAllReplies: publicProcedure
     .input(
@@ -81,7 +103,7 @@ export const postsRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      const replies = await ctx.prisma.post.findMany({
+      const posts = await ctx.prisma.post.findMany({
         where: {
           replyingTo: input.postId,
         },
@@ -91,9 +113,20 @@ export const postsRouter = createTRPCRouter({
             createdAt: "desc",
           },
         ],
+        include: {
+          author: true,
+          _count: {
+            select: { likedBy: true },
+          },
+          likedBy: {
+            where: {
+              id: ctx.userId ?? "",
+            },
+          },
+        },
       });
 
-      return addUsersDataToPosts(replies);
+      return posts;
     }),
   getReplyCount: publicProcedure
     .input(
@@ -114,17 +147,33 @@ export const postsRouter = createTRPCRouter({
         userId: z.string(),
       })
     )
-    .query(async ({ ctx, input }) =>
-      ctx.prisma.post
-        .findMany({
-          where: {
-            authorId: input.userId,
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.prisma.post.findMany({
+        where: {
+          authorId: ctx.userId ?? "",
+          replyingTo: "",
+        },
+        take: 100,
+        orderBy: [
+          {
+            createdAt: "desc",
           },
-          take: 100,
-          orderBy: [{ createdAt: "desc" }],
-        })
-        .then(addUsersDataToPosts)
-    ),
+        ],
+        include: {
+          author: true,
+          _count: {
+            select: { likedBy: true },
+          },
+          likedBy: {
+            where: {
+              id: ctx.userId ?? "",
+            },
+          },
+        },
+      });
+
+      return posts;
+    }),
   create: privateProcedure
     .input(
       z.object({
@@ -145,5 +194,43 @@ export const postsRouter = createTRPCRouter({
           replyingTo: input.replyingTo ?? input.replyingTo,
         },
       });
+    }),
+  like: privateProcedure
+    .input(
+      z.object({
+        postId: z.string(),
+        liked: z.boolean(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.userId;
+      const { liked, postId } = input;
+
+      const { success } = await ratelimit.limit(userId);
+      if (!success) throw new TRPCError({ code: "TOO_MANY_REQUESTS" });
+
+      if (liked) {
+        return await ctx.prisma.post.update({
+          where: {
+            id: postId,
+          },
+          data: {
+            likedBy: {
+              disconnect: { id: userId },
+            },
+          },
+        });
+      } else {
+        return await ctx.prisma.post.update({
+          where: {
+            id: postId,
+          },
+          data: {
+            likedBy: {
+              connect: { id: userId },
+            },
+          },
+        });
+      }
     }),
 });
