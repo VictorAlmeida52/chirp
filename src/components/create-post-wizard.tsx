@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/nextjs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "~/utils/api";
 import toast from "react-hot-toast";
 import { LoadingSpinner } from "~/components/loading";
@@ -17,9 +17,15 @@ export const CreatePostWizard = (props: { replyingTo?: string }) => {
   const { locale } = router;
 
   const lang = locale === "pt-BR" ? locale : locale === "ja" ? locale : "en";
-  void getDictionary(lang).then((dict) => {
-    setLabel(dict.postWizard);
-  });
+  useEffect(() => {
+    const loadTranslation = async () => {
+      const dict = await getDictionary(lang);
+      setLabel(dict.postWizard);
+      console.log("oi");
+    };
+
+    void loadTranslation();
+  }, [lang]);
 
   const [input, setInput] = useState("");
 
