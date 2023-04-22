@@ -27,7 +27,7 @@ export const postsRouter = createTRPCRouter({
         include: {
           author: true,
           _count: {
-            select: { likedBy: true },
+            select: { likedBy: true, replies: true },
           },
           likedBy: {
             where: {
@@ -87,7 +87,7 @@ export const postsRouter = createTRPCRouter({
         include: {
           author: true,
           _count: {
-            select: { likedBy: true },
+            select: { likedBy: true, replies: true },
           },
           likedBy: {
             where: {
