@@ -33,10 +33,12 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.cjs",
-    "**/*.mjs"
+    "**/*.mjs",
+    "next-i18next.config.js"
   ],
   "exclude": [
     "node_modules",
-    "tailwind.config.cjs"
+    "tailwind.config.cjs",
+    "next-i18next.config.js",
   ]
 }

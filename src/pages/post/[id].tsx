@@ -7,8 +7,11 @@ import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { PostView } from "~/components/postview";
 import { CreatePostWizard } from "~/components/create-post-wizard";
 import { Header } from "~/components/header";
+import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { useTranslation } from "react-i18next";
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
+  const { t } = useTranslation("common");
   const { data } = api.posts.getById.useQuery({
     id,
   });
@@ -28,7 +31,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
       <PageLayout>
         <PostView {...data} />
         <div className="p-8">
-          <CreatePostWizard replyingTo={data.post.id} />
+          <CreatePostWizard label={t("postWizard")} replyingTo={data.post.id} />
         </div>
         <div className="border-b">
           {replies?.map((reply) => (
@@ -43,6 +46,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
 };
 
 export const getStaticProps: GetStaticProps = async (context) => {
+  const locale = context.locale ?? "en";
   const ssg = generateSSGHelper();
 
   const id = context.params?.id;
@@ -54,6 +58,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   return {
     props: {
+      ...(await serverSideTranslations(locale, ["common", "footer"])),
       trpcState: ssg.dehydrate(),
       id,
     },

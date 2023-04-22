@@ -1,10 +1,16 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import {
   BirdIcon,
+  GlobeIcon,
+  LanguagesIcon,
   LogInIcon,
   LogOutIcon,
+  MailIcon,
+  MessageSquareIcon,
+  PlusCircleIcon,
   SearchIcon,
   UserIcon,
+  UserPlusIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "~/components/ui/input";
@@ -14,9 +20,46 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+
+const LanguagePicker = () => {
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        <GlobeIcon className="mr-2 h-4 w-4" />
+        <span>Language</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent>
+          <DropdownMenuItem className="hover:cursor-not-allowed">
+            <LanguagesIcon className="mr-2 h-4 w-4" />
+            <Link href="#" locale="en">
+              English
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:cursor-not-allowed">
+            <LanguagesIcon className="mr-2 h-4 w-4" />
+            <Link href="#" locale="pt-BR">
+              Português
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:cursor-not-allowed">
+            <LanguagesIcon className="mr-2 h-4 w-4" />
+            <Link href="#" locale="ja">
+              日本語
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
+  );
+};
 
 const UserPopupButton = () => {
   const { user } = useUser();
@@ -54,6 +97,8 @@ const UserPopupButton = () => {
           <UserIcon className="mr-4 h-4 w-4" />
           <Link href="/me">Profile</Link>
         </DropdownMenuItem>
+
+        <LanguagePicker />
         <DropdownMenuItem className="flex items-center">
           <LogOutIcon className="mr-4 h-4 w-4" />
           <SignOutButton />

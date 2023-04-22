@@ -1,6 +1,9 @@
 import type { RouterOutputs } from "~/utils/api";
 import Link from "next/link";
 import dayjs from "dayjs";
+import "dayjs/locale/en";
+import "dayjs/locale/pt-br";
+import "dayjs/locale/ja";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { api } from "~/utils/api";
 import toast from "react-hot-toast";
@@ -15,6 +18,7 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { CalendarDays, HeartIcon, MessageSquareIcon } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 dayjs.extend(relativeTime);
 
@@ -143,7 +147,10 @@ const PostFooter = (props: { postId: string }) => {
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 export const PostView = (props: PostWithUser) => {
+  const router = useRouter();
+  const { locale } = router;
   const { post, author } = props;
+
   return (
     <div key={post.id} className="flex gap-3 border-b p-4">
       <HoverProfile author={author} />
@@ -154,9 +161,9 @@ export const PostView = (props: PostWithUser) => {
           </Link>
 
           <Link href={`/post/${post.id}`}>
-            <span className="font-thin">{` • ${dayjs(
-              post.createdAt
-            ).fromNow()}`}</span>
+            <span className="font-thin">{` • ${dayjs(post.createdAt)
+              .locale(locale?.toLowerCase() ?? "en")
+              .fromNow()}`}</span>
           </Link>
         </div>
         <span className="text-2xl">{post.content}</span>

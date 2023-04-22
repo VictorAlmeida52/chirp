@@ -15,7 +15,7 @@ const MePage: NextPage<{ id: string }> = ({ id }) => {
 
   if (isSignedIn) {
     const theme: Theme = {
-      baseTheme: dark as BaseThemeTaggedType,
+      baseTheme: dark,
     };
 
     return (

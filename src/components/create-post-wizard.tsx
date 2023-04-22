@@ -6,9 +6,12 @@ import { LoadingSpinner } from "~/components/loading";
 import Image from "next/image";
 import { Button } from "./ui/button";
 
-export const CreatePostWizard = (props: { replyingTo?: string }) => {
+export const CreatePostWizard = (props: {
+  label: string;
+  replyingTo?: string;
+}) => {
   const { user } = useUser();
-  const { replyingTo } = props;
+  const { label, replyingTo } = props;
 
   const [input, setInput] = useState("");
 
@@ -42,7 +45,7 @@ export const CreatePostWizard = (props: { replyingTo?: string }) => {
         height={56}
       />
       <input
-        placeholder="Type some emojis!"
+        placeholder={label}
         className="grow bg-transparent outline-none"
         type="text"
         value={input}
