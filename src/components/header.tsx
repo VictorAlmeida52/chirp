@@ -1,6 +1,8 @@
 import { SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
 import {
   BirdIcon,
+  GlobeIcon,
+  LanguagesIcon,
   LogInIcon,
   LogOutIcon,
   SearchIcon,
@@ -14,9 +16,59 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuPortal,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { setCookie } from "cookies-next";
+
+const LanguagePicker = () => {
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        <GlobeIcon className="mr-2 h-4 w-4" />
+        <span>Language</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent>
+          <DropdownMenuItem className="hover:cursor-not-allowed">
+            <LanguagesIcon className="mr-2 h-4 w-4" />
+            <Link
+              onClick={() => setCookie("NEXT_LOCALE", "en")}
+              href="#"
+              locale="en"
+            >
+              English
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:cursor-not-allowed">
+            <LanguagesIcon className="mr-2 h-4 w-4" />
+            <Link
+              onClick={() => setCookie("NEXT_LOCALE", "pt-BR")}
+              href="#"
+              locale="pt-BR"
+            >
+              Português
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem className="hover:cursor-not-allowed">
+            <LanguagesIcon className="mr-2 h-4 w-4" />
+            <Link
+              onClick={() => setCookie("NEXT_LOCALE", "ja")}
+              href="#"
+              locale="ja"
+            >
+              日本語
+            </Link>
+          </DropdownMenuItem>
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
+  );
+};
 
 const UserPopupButton = () => {
   const { user } = useUser();
@@ -50,10 +102,12 @@ const UserPopupButton = () => {
           My Account
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex items-center hover:cursor-not-allowed">
+        <DropdownMenuItem className="flex items-center">
           <UserIcon className="mr-4 h-4 w-4" />
-          <span>Profile</span>
+          <Link href="/me">Profile</Link>
         </DropdownMenuItem>
+
+        <LanguagePicker />
         <DropdownMenuItem className="flex items-center">
           <LogOutIcon className="mr-4 h-4 w-4" />
           <SignOutButton />

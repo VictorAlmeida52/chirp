@@ -5,10 +5,21 @@ import toast from "react-hot-toast";
 import { LoadingSpinner } from "~/components/loading";
 import Image from "next/image";
 import { Button } from "./ui/button";
+import { useRouter } from "next/router";
+import { getDictionary } from "~/utils/get-dictionary";
 
 export const CreatePostWizard = (props: { replyingTo?: string }) => {
   const { user } = useUser();
   const { replyingTo } = props;
+  const [label, setLabel] = useState("");
+
+  const router = useRouter();
+  const { locale } = router;
+
+  const lang = locale === "pt-BR" ? locale : locale === "ja" ? locale : "en";
+  void getDictionary(lang).then((dict) => {
+    setLabel(dict.postWizard);
+  });
 
   const [input, setInput] = useState("");
 
@@ -42,7 +53,7 @@ export const CreatePostWizard = (props: { replyingTo?: string }) => {
         height={56}
       />
       <input
-        placeholder="Type some emojis!"
+        placeholder={label}
         className="grow bg-transparent outline-none"
         type="text"
         value={input}

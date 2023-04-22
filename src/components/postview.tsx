@@ -1,6 +1,9 @@
 import type { RouterOutputs } from "~/utils/api";
 import Link from "next/link";
 import dayjs from "dayjs";
+import "dayjs/locale/en";
+import "dayjs/locale/pt-br";
+import "dayjs/locale/ja";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { api } from "~/utils/api";
 import toast from "react-hot-toast";
@@ -15,17 +18,12 @@ import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { CalendarDays, HeartIcon, MessageSquareIcon } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/router";
+import type { User } from "@prisma/client";
 
 dayjs.extend(relativeTime);
 
-const HoverProfile = (props: {
-  author: {
-    username: string;
-    id: string;
-    profileImageUrl: string;
-    createdAt: number;
-  };
-}) => {
+const HoverProfile = (props: { author: User }) => {
   const { author } = props;
 
   return (
@@ -65,50 +63,41 @@ const HoverProfile = (props: {
   );
 };
 
-const PostFooter = (props: { postId: string }) => {
-  const { postId } = props;
-  const { isSignedIn: isUserSignedIn } = useUser();
+const PostFooter = (props: {
+  postId: string;
+  likeCount: number;
+  likedBy: User[];
+}) => {
+  const { postId, likedBy, likeCount } = props;
+  const { isSignedIn: isUserSignedIn, user } = useUser();
+  const likedByCurrentUser = likedBy.find((u) => u.id === user?.id);
 
   const ctx = api.useContext();
-  const { data: likes, isLoading: isLoadingLikes } =
-    api.likes.getCountByPost.useQuery({
-      postId,
-    });
   const { data: replies, isLoading: isLoadingReplies } =
     api.posts.getReplyCount.useQuery({
       postId,
     });
-  let likeCount = 0;
   let replyCount = 0;
 
-  const { mutate: dislike } = api.likes.delete.useMutation({
+  const { mutate, isLoading: liking } = api.posts.like.useMutation({
     onSuccess: () => {
-      void ctx.likes.getCountByPost.invalidate();
+      void ctx.posts.invalidate();
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;
       if (errorMessage && errorMessage[0]) {
         toast.error(errorMessage[0]);
       } else {
-        toast.error("Failed to dislike! Please try again later.");
-      }
-    },
-  });
-  const { mutate: like } = api.likes.create.useMutation({
-    onSuccess: () => {
-      void ctx.likes.getCountByPost.invalidate();
-    },
-    onError: (e) => {
-      const errorMessage = e.data?.zodError?.fieldErrors.content;
-      if (errorMessage && errorMessage[0]) {
-        toast.error(errorMessage[0]);
-      } else {
-        dislike({ postId: postId });
+        toast.error("Failed to like/dislike");
       }
     },
   });
 
-  if (!isLoadingLikes && likes && likes > 0) likeCount = likes;
+  const toggleLike = () => {
+    if (liking) return;
+    mutate({ postId, liked: Boolean(likedByCurrentUser) });
+  };
+
   if (!isLoadingReplies && replies && replies > 0) replyCount = replies;
 
   return (
@@ -116,10 +105,18 @@ const PostFooter = (props: { postId: string }) => {
       <button
         disabled={!isUserSignedIn}
         className="group rounded-full p-1"
-        onClick={() => like({ postId })}
+        onClick={() => toggleLike()}
       >
-        <div className="flex items-center gap-2 group-hover:text-red-600">
-          <HeartIcon className="" />
+        <div
+          className={`flex items-center gap-2 group-hover:text-red-700 ${
+            likedByCurrentUser ? "text-red-500" : ""
+          }`}
+        >
+          <HeartIcon
+            className={
+              likedByCurrentUser ? "fill-red-500 group-hover:fill-red-700" : ""
+            }
+          />
           <span>{likeCount}</span>
         </div>
       </button>
@@ -135,9 +132,19 @@ const PostFooter = (props: { postId: string }) => {
 
 type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 export const PostView = (props: PostWithUser) => {
-  const { post, author } = props;
+  const router = useRouter();
+  const { locale } = router;
+  const {
+    id: postId,
+    author,
+    createdAt,
+    content,
+    _count: likes,
+    likedBy,
+  } = props;
+
   return (
-    <div key={post.id} className="flex gap-3 border-b p-4">
+    <div key={postId} className="flex gap-3 border-b p-4">
       <HoverProfile author={author} />
       <div className="flex flex-col">
         <div className="flex gap-2 text-slate-300">
@@ -145,14 +152,18 @@ export const PostView = (props: PostWithUser) => {
             <span>{`@${author.username}`}</span>
           </Link>
 
-          <Link href={`/post/${post.id}`}>
-            <span className="font-thin">{` • ${dayjs(
-              post.createdAt
-            ).fromNow()}`}</span>
+          <Link href={`/post/${postId}`}>
+            <span className="font-thin">{` • ${dayjs(createdAt)
+              .locale(locale?.toLowerCase() ?? "en")
+              .fromNow()}`}</span>
           </Link>
         </div>
-        <span className="text-2xl">{post.content}</span>
-        <PostFooter postId={post.id} />
+        <span className="text-2xl">{content}</span>
+        <PostFooter
+          postId={postId}
+          likeCount={likes.likedBy}
+          likedBy={likedBy}
+        />
       </div>
     </div>
   );

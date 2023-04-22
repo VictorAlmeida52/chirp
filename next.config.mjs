@@ -8,7 +8,11 @@ await import("./src/env.mjs");
 const config = {
   reactStrictMode: true,
   images: {
-    domains: ["images.clerk.dev", "www.gravatar.com"]
+    domains: [
+      "images.clerk.dev",
+      "www.gravatar.com",
+      "avatars.githubusercontent.com",
+    ],
   },
 
   /**
@@ -18,8 +22,8 @@ const config = {
    * @see https://github.com/vercel/next.js/issues/41980
    */
   i18n: {
-    locales: ["en"],
-    defaultLocale: "en"
+    defaultLocale: "en",
+    locales: ["en", "pt-BR", "ja"],
   },
 
   typescript: {

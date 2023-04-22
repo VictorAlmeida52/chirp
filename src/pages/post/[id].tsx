@@ -22,17 +22,17 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
   return (
     <>
       <Head>
-        <title>{`${data.post.content} - @${data.author.username}`}</title>
+        <title>{`${data.content} - @${data.author.username}`}</title>
       </Head>
       <Header />
       <PageLayout>
         <PostView {...data} />
         <div className="p-8">
-          <CreatePostWizard replyingTo={data.post.id} />
+          <CreatePostWizard replyingTo={data.id} />
         </div>
         <div className="border-b">
           {replies?.map((reply) => (
-            <div key={reply.post.id}>
+            <div key={reply.id}>
               <PostView {...reply} />
             </div>
           ))}
