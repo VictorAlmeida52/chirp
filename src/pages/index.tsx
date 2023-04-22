@@ -9,7 +9,6 @@ import { PageLayout } from "~/components/layout";
 import { PostView } from "~/components/postview";
 import { CreatePostWizard } from "~/components/create-post-wizard";
 import { Header } from "~/components/header";
-import { useTranslation } from "react-i18next";
 
 const Feed = () => {
   const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
@@ -28,7 +27,6 @@ const Feed = () => {
 
 const Home: NextPage = () => {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
-  const { t } = useTranslation("common");
 
   // Start fetching asap
   api.posts.getAll.useQuery();
@@ -40,7 +38,7 @@ const Home: NextPage = () => {
     <>
       <Header />
       <PageLayout>
-        {!!isSignedIn && <CreatePostWizard label={t("postWizard")} />}
+        {!!isSignedIn && <CreatePostWizard />}
         <Feed />
       </PageLayout>
     </>

@@ -8,10 +8,8 @@ import { PostView } from "~/components/postview";
 import { CreatePostWizard } from "~/components/create-post-wizard";
 import { Header } from "~/components/header";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
-import { useTranslation } from "react-i18next";
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
-  const { t } = useTranslation("common");
   const { data } = api.posts.getById.useQuery({
     id,
   });
@@ -31,7 +29,7 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
       <PageLayout>
         <PostView {...data} />
         <div className="p-8">
-          <CreatePostWizard label={t("postWizard")} replyingTo={data.id} />
+          <CreatePostWizard replyingTo={data.id} />
         </div>
         <div className="border-b">
           {replies?.map((reply) => (
@@ -58,9 +56,9 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   return {
     props: {
-      ...(await serverSideTranslations(locale, ["common"])),
       trpcState: ssg.dehydrate(),
       id,
+      ...(await serverSideTranslations(locale, ["common"])),
     },
   };
 };

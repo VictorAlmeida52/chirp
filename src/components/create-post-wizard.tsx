@@ -5,13 +5,15 @@ import toast from "react-hot-toast";
 import { LoadingSpinner } from "~/components/loading";
 import Image from "next/image";
 import { Button } from "./ui/button";
+import { useTranslation } from "react-i18next";
 
-export const CreatePostWizard = (props: {
-  label: string;
-  replyingTo?: string;
-}) => {
+export const CreatePostWizard = (props: { replyingTo?: string }) => {
   const { user } = useUser();
-  const { label, replyingTo } = props;
+  const { replyingTo } = props;
+
+  const { t } = useTranslation("common");
+
+  const label = t("postWizard");
 
   const [input, setInput] = useState("");
 
