@@ -5,15 +5,21 @@ import toast from "react-hot-toast";
 import { LoadingSpinner } from "~/components/loading";
 import Image from "next/image";
 import { Button } from "./ui/button";
-import { useTranslation } from "react-i18next";
+import { useRouter } from "next/router";
+import { getDictionary } from "~/utils/get-dictionary";
 
 export const CreatePostWizard = (props: { replyingTo?: string }) => {
   const { user } = useUser();
   const { replyingTo } = props;
+  const [label, setLabel] = useState("");
 
-  const { t } = useTranslation("common");
+  const router = useRouter();
+  const { locale } = router;
 
-  const label = t("postWizard");
+  const lang = locale === "pt-BR" ? locale : locale === "ja" ? locale : "en";
+  void getDictionary(lang).then((dict) => {
+    setLabel(dict.postWizard);
+  });
 
   const [input, setInput] = useState("");
 

@@ -7,7 +7,6 @@ import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { PostView } from "~/components/postview";
 import { CreatePostWizard } from "~/components/create-post-wizard";
 import { Header } from "~/components/header";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 
 const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
   const { data } = api.posts.getById.useQuery({
@@ -44,7 +43,6 @@ const SinglePostPage: NextPage<{ id: string }> = ({ id }) => {
 };
 
 export const getStaticProps: GetStaticProps = async (context) => {
-  const locale = context.locale ?? "en";
   const ssg = generateSSGHelper();
 
   const id = context.params?.id;
@@ -58,7 +56,6 @@ export const getStaticProps: GetStaticProps = async (context) => {
     props: {
       trpcState: ssg.dehydrate(),
       id,
-      ...(await serverSideTranslations(locale, ["common"])),
     },
   };
 };

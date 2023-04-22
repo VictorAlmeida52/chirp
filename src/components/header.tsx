@@ -5,12 +5,8 @@ import {
   LanguagesIcon,
   LogInIcon,
   LogOutIcon,
-  MailIcon,
-  MessageSquareIcon,
-  PlusCircleIcon,
   SearchIcon,
   UserIcon,
-  UserPlusIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "~/components/ui/input";

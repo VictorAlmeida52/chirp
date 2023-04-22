@@ -2,12 +2,12 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import { Header } from "~/components/header";
 import { UserProfile, useUser } from "@clerk/nextjs";
-import { type Theme, type BaseThemeTaggedType } from "@clerk/types";
+import { type Theme } from "@clerk/types";
 import { dark } from "@clerk/themes";
 import { LoadingPage } from "~/components/loading";
 import { useRouter } from "next/router";
 
-const MePage: NextPage<{ id: string }> = ({ id }) => {
+const MePage: NextPage = () => {
   const { user, isSignedIn, isLoaded } = useUser();
   const router = useRouter();
 

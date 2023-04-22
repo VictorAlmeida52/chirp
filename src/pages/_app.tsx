@@ -1,6 +1,4 @@
 import type { AppProps, AppType } from "next/app";
-
-import { appWithTranslation } from "next-i18next";
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
@@ -39,4 +37,4 @@ const MyApp: AppType = ({ Component, pageProps }: AppProps) => {
   );
 };
 
-export default api.withTRPC(appWithTranslation(MyApp));
+export default api.withTRPC(MyApp);

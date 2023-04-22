@@ -19,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { CalendarDays, HeartIcon, MessageSquareIcon } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 
 dayjs.extend(relativeTime);
 
@@ -81,7 +81,7 @@ const PostFooter = (props: {
 
   const { mutate, isLoading: liking } = api.posts.like.useMutation({
     onSuccess: () => {
-      ctx.posts.invalidate();
+      void ctx.posts.invalidate();
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content;

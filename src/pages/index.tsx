@@ -1,6 +1,5 @@
 import { useUser } from "@clerk/nextjs";
-import { type GetStaticProps, type NextPage } from "next";
-import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { type NextPage } from "next";
 
 import { api } from "~/utils/api";
 
@@ -43,15 +42,6 @@ const Home: NextPage = () => {
       </PageLayout>
     </>
   );
-};
-
-export const getStaticProps: GetStaticProps = async (context) => {
-  const locale = context.locale ?? "en";
-  return {
-    props: {
-      ...(await serverSideTranslations(locale, ["common"])),
-    },
-  };
 };
 
 export default Home;
