@@ -50,9 +50,9 @@ const UserPopupButton = () => {
           My Account
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="flex items-center hover:cursor-not-allowed">
+        <DropdownMenuItem className="flex items-center">
           <UserIcon className="mr-4 h-4 w-4" />
-          <span>Profile</span>
+          <Link href="/me">Profile</Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="flex items-center">
           <LogOutIcon className="mr-4 h-4 w-4" />
