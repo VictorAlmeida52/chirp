@@ -8,19 +8,36 @@ import { LoadingPage } from "~/components/loading";
 import { PostView } from "~/components/postview";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
 import { Header } from "~/components/header";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-const ProfileFeed = (props: { userId: string }) => {
-  const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
-    userId: props.userId,
-  });
+const ProfileFeed = (props: { userId: string; tab: string }) => {
+  let posts;
 
-  if (isLoading) return <LoadingPage />;
+  if (props.tab === "posts") {
+    const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
+      userId: props.userId,
+    });
 
-  if (!data || data.length === 0) return <div>User has not posted</div>;
+    if (isLoading) return <LoadingPage />;
+
+    if (!data || data.length === 0) return <div>User has not posted</div>;
+
+    posts = data;
+  } else {
+    const { data, isLoading } = api.posts.getLikesByUserId.useQuery({
+      userId: props.userId,
+    });
+
+    if (isLoading) return <LoadingPage />;
+
+    if (!data || data.length === 0) return <div>User has not posted</div>;
+
+    posts = data;
+  }
 
   return (
-    <div className="flex flex-col">
-      {data.map((fullPost) => (
+    <div className="flex flex-col border">
+      {posts.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.id} />
       ))}
     </div>
@@ -57,7 +74,22 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
           data.username ?? data.externalUsername ?? "unknown"
         }`}</div>
         <div className="w-full border-t border-slate-400">
-          <ProfileFeed userId={data.id} />
+          <Tabs defaultValue="posts">
+            <TabsList className="flex justify-evenly">
+              <TabsTrigger className="w-full" value="posts">
+                Posts
+              </TabsTrigger>
+              <TabsTrigger className="w-full" value="likes">
+                Likes
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="posts">
+              <ProfileFeed userId={data.id} tab="posts" />
+            </TabsContent>
+            <TabsContent value="likes">
+              <ProfileFeed userId={data.id} tab="likes" />
+            </TabsContent>
+          </Tabs>
         </div>
       </PageLayout>
     </>

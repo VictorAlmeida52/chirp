@@ -66,18 +66,14 @@ const HoverProfile = (props: { author: User }) => {
 const PostFooter = (props: {
   postId: string;
   likeCount: number;
+  replyCount: number;
   likedBy: User[];
 }) => {
-  const { postId, likedBy, likeCount } = props;
+  const { postId, likedBy, likeCount, replyCount: repliesCount } = props;
   const { isSignedIn: isUserSignedIn, user } = useUser();
   const likedByCurrentUser = likedBy.find((u) => u.id === user?.id);
 
   const ctx = api.useContext();
-  const { data: replies, isLoading: isLoadingReplies } =
-    api.posts.getReplyCount.useQuery({
-      postId,
-    });
-  let replyCount = 0;
 
   const { mutate, isLoading: liking } = api.posts.like.useMutation({
     onSuccess: () => {
@@ -92,13 +88,10 @@ const PostFooter = (props: {
       }
     },
   });
-
   const toggleLike = () => {
     if (liking) return;
     mutate({ postId, liked: Boolean(likedByCurrentUser) });
   };
-
-  if (!isLoadingReplies && replies && replies > 0) replyCount = replies;
 
   return (
     <div className="mt-1 flex h-fit w-fit items-center justify-center gap-1 hover:cursor-pointer">
@@ -123,7 +116,7 @@ const PostFooter = (props: {
       <Link className="group rounded-full p-1" href={`/post/${postId}`}>
         <div className="flex items-center gap-2 group-hover:text-blue-600">
           <MessageSquareIcon className="" />
-          <span>{replyCount}</span>
+          <span>{repliesCount ?? 0}</span>
         </div>
       </Link>
     </div>
@@ -134,14 +127,7 @@ type PostWithUser = RouterOutputs["posts"]["getAll"][number];
 export const PostView = (props: PostWithUser) => {
   const router = useRouter();
   const { locale } = router;
-  const {
-    id: postId,
-    author,
-    createdAt,
-    content,
-    _count: likes,
-    likedBy,
-  } = props;
+  const { id: postId, author, createdAt, content, _count, likedBy } = props;
 
   return (
     <div key={postId} className="flex gap-3 border-b p-4">
@@ -161,7 +147,8 @@ export const PostView = (props: PostWithUser) => {
         <span className="text-2xl">{content}</span>
         <PostFooter
           postId={postId}
-          likeCount={likes.likedBy}
+          likeCount={_count.likedBy}
+          replyCount={_count.replies}
           likedBy={likedBy}
         />
       </div>
