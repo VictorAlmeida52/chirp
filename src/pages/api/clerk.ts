@@ -20,7 +20,7 @@ export default async function handler(
     };
     const { data: user, type } = req.body as clerkEvent;
 
-    if (type === "user.created") {
+    if (type === "user.created" || type === "user.updated") {
       const name =
         user.username ?? `${user.first_name ?? "unknown"} ${user.last_name}`;
       try {
