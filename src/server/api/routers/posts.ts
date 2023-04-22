@@ -160,7 +160,7 @@ export const postsRouter = createTRPCRouter({
           },
           likedBy: {
             where: {
-              id: input.userId,
+              id: ctx.userId ?? "NO_ID_FOUND",
             },
           },
         },
