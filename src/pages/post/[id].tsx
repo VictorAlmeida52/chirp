@@ -58,7 +58,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   return {
     props: {
-      ...(await serverSideTranslations(locale, ["common", "footer"])),
+      ...(await serverSideTranslations(locale, ["common"])),
       trpcState: ssg.dehydrate(),
       id,
     },
