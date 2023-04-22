@@ -55,7 +55,7 @@ export const postsRouter = createTRPCRouter({
       include: {
         author: true,
         _count: {
-          select: { likedBy: true },
+          select: { likedBy: true, replies: true },
         },
         likedBy: {
           where: {
@@ -99,19 +99,6 @@ export const postsRouter = createTRPCRouter({
 
       return posts;
     }),
-  getReplyCount: publicProcedure
-    .input(
-      z.object({
-        postId: z.string(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      return await ctx.prisma.post.count({
-        where: {
-          replyingTo: input.postId,
-        },
-      });
-    }),
   getPostsByUserId: publicProcedure
     .input(
       z.object({
@@ -133,11 +120,47 @@ export const postsRouter = createTRPCRouter({
         include: {
           author: true,
           _count: {
-            select: { likedBy: true },
+            select: { likedBy: true, replies: true },
           },
           likedBy: {
             where: {
               id: ctx.userId ?? "",
+            },
+          },
+        },
+      });
+
+      return posts;
+    }),
+  getLikesByUserId: publicProcedure
+    .input(
+      z.object({
+        userId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const posts = await ctx.prisma.post.findMany({
+        where: {
+          likedBy: {
+            some: {
+              id: input.userId,
+            },
+          },
+        },
+        take: 100,
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
+        include: {
+          author: true,
+          _count: {
+            select: { likedBy: true, replies: true },
+          },
+          likedBy: {
+            where: {
+              id: input.userId,
             },
           },
         },

@@ -19,9 +19,13 @@ model Post {
   author     User     @relation("author", fields: [authorId], references: [id])
   authorId   String
   replyingTo String   @default("")
-  likedBy    User[]
+  repliedTo  Post?    @relation("reply", fields: [replyingTo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies    Post[]   @relation("reply")
 
-  @@index([authorId, replyingTo])
+  likedBy User[]
+
+  @@index([authorId])
+  @@index([replyingTo])
 }
 
 model User {
